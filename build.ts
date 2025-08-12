@@ -5,9 +5,8 @@ import * as fs from "node:fs";
 export let build = async (args: Partial<esbuild.BuildOptions>) => {
   await esbuild.build({
     ...args,
-    entryPoints: ["src/mod.ts"],
-    bundle: true,
-    external: ["immer"],
+    entryPoints: ["src/*.ts"],
+    bundle: false,
     format: "esm",
     treeShaking: true,
     target: ["es2022"],

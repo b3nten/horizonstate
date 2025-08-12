@@ -95,7 +95,7 @@ class TransactionInstance<Store = Objectish> {
   update_fns: Array<UpdateInstance> = [];
 }
 
-class Transaction<Args, Store extends Objectish> {
+export class Transaction<Args, Store extends Objectish> {
   constructor(
     private mutation_fn: TransactionFunction<Args, Store>,
     private model: Model<Store>,
@@ -308,7 +308,7 @@ export class Model<T extends Objectish> {
    * @returns
    */
   addTransaction = <Args = void>(mutation_fn: TransactionFunction<Args, T>) => {
-    ASSERT(
+    DEV: ASSERT(
       typeof mutation_fn === "function",
       "mutation function must be a function",
     );
@@ -320,7 +320,7 @@ export class Model<T extends Objectish> {
   };
 
   subscribe = (callback: (state: T) => void): UnsubscribeFn => {
-    ASSERT(typeof callback === "function", "callback must be a function");
+    DEV: ASSERT(typeof callback === "function", "callback must be a function");
     return model_internals.get(this)!.subscribe(callback);
   };
 
@@ -328,8 +328,8 @@ export class Model<T extends Objectish> {
     selector: Selector,
     callback: (state: Selector extends (state: T) => infer U ? U : T) => void,
   ): UnsubscribeFn => {
-    ASSERT(typeof selector === "function", "selector must be a function");
-    ASSERT(typeof callback === "function", "callback must be a function");
+    DEV: ASSERT(typeof selector === "function", "selector must be a function");
+    DEV: ASSERT(typeof callback === "function", "callback must be a function");
     return model_internals.get(this)!.subscribe(callback, selector);
   };
 }
