@@ -1,7 +1,7 @@
 {
   "type": "module",
   "name": "horizonstate",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "description": "A transactional state management library for JS with temporal ordering and automatic rollback",
   "author": {
     "name": "benton boychuk-chorney"
