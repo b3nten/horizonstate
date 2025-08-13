@@ -34,9 +34,9 @@ let m = new Model({
 Define transactions:
 
 ```ts
-let setFoo = m.addTransaction(async (args: string, { optimistic, update, applyOptimisticUpdates }) => {
+let setFoo = m.addTransaction(async (args: string, { optimisticUpdate, update, applyOptimisticUpdates }) => {
   // set state optimistically, which will be rolled back once this transaction completes
-  optimistic(draft => {
+  optimisticUpdate(draft => {
     draft.foo = args;
     draft.pending = true;
   });
@@ -56,7 +56,7 @@ setFoo.run("baz");
 Transactions can await prior pending transactions:
 
 ```ts
-model.addTransaction(async (args: any, { optimistic, update, pendingTransactions }) => {
+model.addTransaction(async (args: any, { optimisticUpdate, update, pendingTransactions }) => {
   await pendingTransactions;
   // run transaction...
 });
@@ -70,7 +70,7 @@ this state could be stale. It's generally advisable to await previous transactio
 need to send state from the model to the server.
 
 ```ts
-model.addTransaction(async (args: any, { optimistic, update, state }) => {
+model.addTransaction(async (args: any, { optimisticUpdate, update, state }) => {
   let s = state();
   // continue with transaction...
 });
@@ -79,8 +79,8 @@ model.addTransaction(async (args: any, { optimistic, update, state }) => {
 You can also drop optimistic updates during your transaction, which will automatically roll them back:
 
 ```ts
-model.addTransaction(async (args: any, { optimistic, update, dropOptimisticUpdates }) => {
-  optimistic(draft => {
+model.addTransaction(async (args: any, { optimisticUpdate, update, dropOptimisticUpdates }) => {
+  optimisticUpdate(draft => {
     draft.foo = args;
     draft.pending = true;
   });
@@ -89,7 +89,7 @@ model.addTransaction(async (args: any, { optimistic, update, dropOptimisticUpdat
     // drop all prior optimistic updates
     dropOptimisticUpdates();
   }
-  optimistic(draft => draft.error = true);
+  optimisticUpdate(draft => draft.error = true);
   let newResult = await someOtherApiCall(args);
   update(draft => draft.foo = newResult.foo);
 });
@@ -99,8 +99,8 @@ Since optimistic updates are automatically rolled back, handling errors is simpl
 a matter of applying a different update if applicable.
 
 ```ts
-model.addTransaction(async (args: any, { optimistic, update }) => {
-  optimistic(draft => draft.foo = args)
+model.addTransaction(async (args: any, { optimisticUpdate, update }) => {
+  optimisticUpdate(draft => draft.foo = args)
   let result = await someApiCall(args);
   if(result.success) {
     update(draft => draft.foo = result.foo);
