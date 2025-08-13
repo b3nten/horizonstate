@@ -47,7 +47,7 @@ let setFoo = m.addTransaction(async (args: string, { optimistic, update }) => {
 Run the transaction:
 
 ```ts
-await setFoo.run("baz");
+setFoo.run("baz");
 ```
 
 ### License
