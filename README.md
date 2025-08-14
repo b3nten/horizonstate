@@ -2,7 +2,7 @@
 
 <br />
 
-<!--![horizonstate](/assets/banner.jpg)-->
+![horizonstate](/.github/banner.jpg)
 
 <h1>horizonstate</h3>
 
