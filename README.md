@@ -16,7 +16,7 @@
 
 ## Overview
 
-Horizonstate is a transactional state management library for JS that is designed to provide simple primitives for managing state without concern for response ordering or manual rollback of optimistic updates. It does this by saving a snapshot of the state before each transaction and recording mutations to the state via updator functions. These mutations can be replayed or dropped when prior transactions complete, ensuring that each update to the state is applied in the correct order.
+Horizonstate is a transactional state management library for JS that is designed to provide simple primitives for managing state without concern for response ordering or manual rollback of optimistic updates. It does this by saving a snapshot of the state before each transaction and recording mutations to the state via updator functions. These mutations can be replayed or dropped when prior transactions complete, ensuring that each update to the state is applied in the correct order. Transactions run concurrently and non-blocking by default, but temporal ordering results in eventual consistency and automatic conflict resolution.
 
 ## Usage
 
