@@ -25,10 +25,16 @@ Define a model:
 ```ts
 import { Model } from "horizonstate";
 
-let m = new Model({
-  foo: "bar",
-  pending: false,
-});
+let m = new Model(
+  {
+    foo: "bar",
+    pending: false,
+  },
+  // optional config:
+  {
+    timeout: 10000 // the minimum amount of time a transaction has to complete. Default: 10000ms
+  }
+);
 ```
 
 Define transactions:

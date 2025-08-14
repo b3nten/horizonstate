@@ -93,6 +93,7 @@ class TransactionInstance<Store = Objectish> {
   current_state?: Store;
   prev_transaction_promise = Promise.withResolvers<void>();
   update_fns: Array<UpdateInstance> = [];
+  created_at = Date.now();
 }
 
 export class Transaction<Args, Store extends Objectish> {
@@ -156,8 +157,15 @@ export class Transaction<Args, Store extends Objectish> {
   };
 }
 
+interface ModelConfig {
+  /**
+   * The minimum amount of time a transaction can run before being dropped.
+   */
+  timeout: number;
+}
+
 class InternalModel<Store extends Objectish = Objectish> {
-  constructor(args: { base_state: Store; config: {} }) {
+  constructor(args: { base_state: Store; config: ModelConfig }) {
     this.base_state = args.base_state;
     this.current_state = args.base_state;
     this.config = args.config;
@@ -166,7 +174,7 @@ class InternalModel<Store extends Objectish = Objectish> {
   base_state: Store;
   current_state: Store;
   transaction_queue: TransactionInstance<Store>[] = [];
-  config: {};
+  config: ModelConfig;
 
   get_previous_state = (op: TransactionInstance<Store>): Store => {
     let op_index = this.transaction_queue.findIndex((x) => op === x);
@@ -248,6 +256,13 @@ class InternalModel<Store extends Objectish = Objectish> {
         continue;
       }
 
+      // kill transaction if it's holding up the queue
+      if (i === 0 && op.created_at > Date.now() - this.config.timeout) {
+        DEV: console.warn("Transaction timed out", op);
+        this.transaction_queue.shift();
+        continue;
+      }
+
       let prev_state = this.get_previous_state(op);
 
       // we use the prev_state as a base to patch updates onto
@@ -283,12 +298,15 @@ class InternalModel<Store extends Objectish = Objectish> {
 let model_internals = new WeakMap<Model<any>, InternalModel<any>>();
 
 export class Model<T extends Objectish> {
-  constructor(state: T, config: {} = {}) {
+  constructor(state: T, config: Partial<ModelConfig> = {}) {
     model_internals.set(
       this,
       new InternalModel({
         base_state: state,
-        config: config,
+        config: {
+          timeout: 10000,
+          ...config,
+        },
       }),
     );
   }
