@@ -150,10 +150,14 @@ export class Transaction<Args, Store extends Objectish> {
         model.queue_update();
       },
       pendingTransactions: op.prev_transaction_promise.promise,
-    }).finally(() => {
-      op.complete = true;
-      model.queue_update();
-    });
+    })
+      .catch((error) => {
+        DEV: console.error(`Transaction threw an unhandled exception`, error);
+      })
+      .finally(() => {
+        op.complete = true;
+        model.queue_update();
+      });
   };
 }
 
@@ -247,7 +251,14 @@ class InternalModel<Store extends Objectish = Objectish> {
         this.transaction_queue.shift(); // remove
         for (let patch_fn of op.update_fns) {
           if (patch_fn.patch_type !== "optimistic") {
-            this.base_state = produce(this.base_state, patch_fn);
+            try {
+              this.base_state = produce(this.base_state, patch_fn);
+            } catch (error) {
+              DEV: console.error(
+                `Transaction threw an unhandled exception inside update callback:`,
+                error,
+              );
+            }
           }
         }
         this.current_state = this.base_state;
@@ -275,7 +286,14 @@ class InternalModel<Store extends Objectish = Objectish> {
           continue;
         }
         patches_applied = true;
-        op.current_state = prev_state = produce(prev_state, patch_fn);
+        try {
+          op.current_state = prev_state = produce(prev_state, patch_fn);
+        } catch (error) {
+          DEV: console.error(
+            `Transaction threw an unhandled exception inside ${patch_fn.patch_type === "optimistic" ? "optimisticUpdate" : "update"} callback:`,
+            error,
+          );
+        }
       }
       // move on to next transaction
       this.current_state = prev_state;
@@ -287,10 +305,24 @@ class InternalModel<Store extends Objectish = Objectish> {
         if (listener.selector) {
           let new_selected_state = listener.selector(this.current_state);
           if (!Object.is(new_selected_state, listener.previous_state)) {
-            listener.callback(new_selected_state);
+            try {
+              listener.callback(new_selected_state);
+            } catch (error) {
+              DEV: console.error(
+                `Listener threw an unhandled exception inside callback:`,
+                error,
+              );
+            }
           }
         } else {
-          listener.callback(this.current_state);
+          try {
+            listener.callback(this.current_state);
+          } catch (error) {
+            DEV: console.error(
+              `Listener threw an unhandled exception inside callback:`,
+              error,
+            );
+          }
         }
       }
     }

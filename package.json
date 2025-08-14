@@ -8,7 +8,10 @@
   },
   "scripts": {
     "dev": "cd playground && npm run dev",
-    "build": "tsx build"
+    "build": "tsx build",
+    "test": "tsx --test test/test.ts",
+    "test:watch": "tsx --test --watch test/test.ts",
+    "test:coverage": "tsx --test --experimental-test-coverage test/test.ts"
   },
   "exports": {
     ".": {
