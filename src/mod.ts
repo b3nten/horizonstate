@@ -335,15 +335,27 @@ export class Model<T extends Objectish> {
     return new Transaction(mutation_fn, this);
   };
 
+  /**
+   * Run an inline transaction via anonymous function.
+   * @param mutation function
+   */
   runInline = (mutation_fn: (args: InlineTransactionFunction<T>) => void) => {
     this.addTransaction(async (_: void, args) => mutation_fn(args)).run();
   };
 
+  /**
+   * Subscribe to the model state.
+   * @param callback
+   * @returns
+   */
   subscribe = (callback: (state: T) => void): UnsubscribeFn => {
     DEV: ASSERT(typeof callback === "function", "callback must be a function");
     return model_internals.get(this)!.subscribe(callback);
   };
 
+  /**
+   * Subscribe to a selector of the model state.
+   */
   select = <Selector extends (state: T) => any>(
     selector: Selector,
     callback: (state: Selector extends (state: T) => infer U ? U : T) => void,
