@@ -253,11 +253,13 @@ class InternalModel<Store extends Objectish = Objectish> {
         this.current_state = this.base_state;
         // resolve the next transaction
         this.transaction_queue[0]?.prev_transaction_promise.resolve();
+        // cleanup transaction instance
+        op.update_fns.length = 0;
         continue;
       }
 
       // kill transaction if it's holding up the queue
-      if (i === 0 && op.created_at > Date.now() - this.config.timeout) {
+      if (i === 0 && op.created_at < Date.now() - this.config.timeout) {
         DEV: console.warn("Transaction timed out", op);
         this.transaction_queue.shift();
         continue;
