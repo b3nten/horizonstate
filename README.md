@@ -25,7 +25,7 @@ Define a model:
 ```ts
 import { Model } from "horizonstate";
 
-let m = new Model(
+let model = new Model(
   {
     foo: "bar",
     pending: false,
@@ -40,7 +40,7 @@ let m = new Model(
 Define transactions:
 
 ```ts
-let setFoo = m.addTransaction(async (args: string, { optimisticUpdate, update, applyOptimisticUpdates }) => {
+let setFoo = model.addTransaction(async (args: string, { optimisticUpdate, update, applyOptimisticUpdates }) => {
   // set state optimistically, which will be rolled back once this transaction completes
   optimisticUpdate(draft => {
     draft.foo = args;
@@ -57,6 +57,16 @@ Run the transaction:
 
 ```ts
 setFoo.run("baz");
+```
+
+Subscribe to updates:
+
+```ts
+model.subscribe((state) => {
+  console.log(state.foo);
+});
+// with a selector
+model.select(state => state.foo, console.log);
 ```
 
 Transactions can await prior pending transactions:
